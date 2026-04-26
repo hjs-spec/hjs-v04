@@ -13,44 +13,44 @@ pinned: false
 
 **Event Recording Layer with Machine Immutability + Optional Human Privacy**
 
-本仓库托管 **HJS v0.4** IETF Internet-Draft 的交互式参考实现。
+This repository hosts the interactive reference implementation of the **HJS v0.4** IETF Internet-Draft.
 
-HJS 是 JEP（Judgment Event Protocol）的前身/过渡版本，核心差异在于更强调**"机器不可变 + 人类隐私"**的双层设计。
+HJS is the predecessor / transition version of JEP (Judgment Event Protocol). The core difference is a stronger emphasis on the dual-layer design of **"Machine Immutability + Human Privacy"**.
 
-## 核心原则
+## Core Principles
 
-1. **Machine Immutability** — 机器行为字段密码学不可篡改
-2. **Optional Human Anonymity** — 人类身份可配置匿名化
-3. **Technical Neutrality** — 只记录，不判断
-4. **Regulatory Compliance** — 满足全球 AI 透明度与隐私法规
+1. **Machine Immutability** — Machine behavior fields are cryptographically tamper-proof
+2. **Optional Human Anonymity** — Human identities can be configured for anonymization
+3. **Technical Neutrality** — Record only, do not judge
+4. **Regulatory Compliance** — Meets global AI transparency and privacy regulations
 
-## 技术特性
+## Technical Features
 
-| 章节 | 实现 |
-|------|------|
-| 4.1 不可变机器字段 | 篡改检测器 |
-| 4.2 可配置人类字段 | 4 种隐私模式 |
-| 5.1 Digest-Only | 盐值摘要 |
-| 5.2 TTL | 自动过期 |
-| 5.3 Identity Rotation | 扩展字段 |
-| 6 验证规则 | 6 步验证器 |
+| Section | Implementation |
+|---------|---------------|
+| 4.1 Immutable Machine Fields | Tamper detector |
+| 4.2 Configurable Human Fields | 4 privacy modes |
+| 5.1 Digest-Only | Salted digest |
+| 5.2 TTL | Auto-expiry |
+| 5.3 Identity Rotation | Extension fields |
+| 6 Verification Rules | 6-step validator |
 
-## 演进关系
+## Evolution Relationship
 
-- **HJS v0.4** → 关注"记录什么"和"如何保护隐私"（工程实践层）
-- **JEP** → 关注"最少记录什么"和"如何验证"（协议架构层）
-- **因果可观测性** → 关注"为什么必须这样记录"（数学基础层）
+- **HJS v0.4** → Focuses on "what to record" and "how to protect privacy" (engineering practice layer)
+- **JEP** → Focuses on "the minimum to record" and "how to verify" (protocol architecture layer)
+- **Causal Observability** → Focuses on "why it must be recorded this way" (mathematical foundation layer)
 
-## 关联资源
+## Related Resources
 
-- JEP 协议实现：[cognitiveemergencelab/jep-spec](https://huggingface.co/spaces/cognitiveemergencelab/jep-spec)
-- 数学基础演示：[cognitiveemergencelab/causal-observability-demo](https://huggingface.co/spaces/cognitiveemergencelab/causal-observability-demo)
-- 论文与语料：[cognitiveemergencelab/jep-papers-and-corpus](https://huggingface.co/datasets/cognitiveemergencelab/jep-papers-and-corpus)
+- JEP Protocol Implementation: [cognitiveemergencelab/jep-spec](https://huggingface.co/spaces/cognitiveemergencelab/jep-spec)
+- Mathematical Foundation Demo: [cognitiveemergencelab/causal-observability-demo](https://huggingface.co/spaces/cognitiveemergencelab/causal-observability-demo)
+- Papers & Corpus: [cognitiveemergencelab/jep-papers-and-corpus](https://huggingface.co/datasets/cognitiveemergencelab/jep-papers-and-corpus)
 
-## 许可证
+## License
 
 Apache-2.0
 
-## 作者
+## Author
 
 Cognitive Emergence Lab / Human Judgment Systems Foundation
