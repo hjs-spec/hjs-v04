@@ -224,7 +224,7 @@ def generate_hjs_event(verb, who_raw, what_content, aud, ref_mode, ref_hash,
     if not who_raw.strip():
         return "❌ who (participant) is REQUIRED", "", "", "", ""
     
-    ref = ref_hash if ref_mode == "引用已有事件 (ref)" else None
+    ref = ref_hash if ref_mode == "Reference existing event (ref)" else None
     
     try:
         event = HJSEvent(
@@ -261,16 +261,16 @@ def generate_hjs_event(verb, who_raw, what_content, aud, ref_mode, ref_hash,
 def verify_hjs_event(event_json, public_key_pem, clock_skew):
     """Verify HJS event per Section 6"""
     if not event_json.strip() or not public_key_pem.strip():
-        return "❌ 请输入事件 JSON 和公钥 PEM"
+        return "❌ Please provide event JSON and public key PEM"
     
     try:
         event_dict = json.loads(event_json)
     except json.JSONDecodeError as e:
-        return f"❌ JSON 解析错误: {str(e)}"
+        return f"❌ JSON parse error: {str(e)}"
     
     sig = event_dict.pop("sig", None)
     if not sig:
-        return "❌ 缺少 sig 字段 (HJS Receipt signature REQUIRED)"
+        return "❌ Missing sig field (HJS Receipt signature REQUIRED)"
     
     validator = HJSValidator(clock_skew=int(clock_skew))
     valid, msg = validator.verify(event_dict, sig, public_key_pem)
@@ -286,154 +286,154 @@ with gr.Blocks(
     # HJS v0.4 — Accountability Layer for AI Agents
     ### Event Recording Layer with Machine Immutability + Optional Human Privacy
     
-    本演示实现了 **HJS v0.4** 草案的核心设计原则：
+    This demo implements the core design principles of **HJS v0.4** draft:
     
-    > **1. Machine Immutability**: AI 决策事件和链完整性密码学不可篡改，签名锚定后禁止修改或删除。
+    > **1. Machine Immutability**: AI decision events and chain integrity are cryptographically tamper-proof; no modification or deletion after signature anchoring.
     > 
-    > **2. Optional Human Anonymity**: 人类参与者身份可配置匿名化，支持 DID、公钥哈希、盐值摘要、临时标识符。
+    > **2. Optional Human Anonymity**: Human participant identity can be configured for anonymization, supporting DID, public key hash, salted digest, and temporary identifiers.
     > 
-    > **3. Technical Neutrality**: 协议只记录客观事件，不判断合法性、意图或过错。
+    > **3. Technical Neutrality**: The protocol only records objective events, without judging legality, intent, or fault.
     > 
-    > **4. Regulatory Compliance**: 满足全球 AI 透明度和隐私法规（数据最小化、被遗忘权、用户同意）。
+    > **4. Regulatory Compliance**: Meets global AI transparency and privacy regulations (data minimization, right to be forgotten, user consent).
     """)
     
     with gr.Row():
         # =================== LEFT: Event Generator ===================
         with gr.Column(scale=1):
-            gr.Markdown("### 🛠️ 生成 HJS 事件")
+            gr.Markdown("### 🛠️ Generate HJS Event")
             
             hjs_verb = gr.Dropdown(
                 choices=["J", "D", "V", "T"],
                 value="J",
-                label="verb (JEP 原语)",
-                info="J=决策, D=授权, V=验证, T=终止 (Section 3.1)"
+                label="verb (JEP Primitive)",
+                info="J=Judge, D=Delegate, V=Verify, T=Terminate (Section 3.1)"
             )
             hjs_who = gr.Textbox(
-                label="who_raw (原始身份)",
+                label="who_raw (Original Identity)",
                 value="user@example.com",
-                info="原始人类参与者标识 (将被隐私处理)"
+                info="Original human participant identifier (will be privacy-processed)"
             )
             hjs_what = gr.Textbox(
-                label="what_content (决策内容)",
+                label="what_content (Decision Content)",
                 value="approve-loan-application-#12345",
-                info="机器行为内容 (自动计算 SHA-256 multihash)"
+                info="Machine action content (auto-computed SHA-256 multihash)"
             )
             hjs_aud = gr.Textbox(
-                label="aud (接收方)",
+                label="aud (Recipient)",
                 value="https://bank.example.com/hjs-gateway",
-                info="Section 2.3: 绑定事件到特定接收方"
+                info="Section 2.3: Bind event to specific recipient"
             )
             
             hjs_ref_mode = gr.Radio(
-                choices=["无引用 (root J event, ref=null)", "引用已有事件 (ref)"],
-                value="无引用 (root J event, ref=null)",
-                label="ref (链引用, Section 4.1)"
+                choices=["No reference (root J event, ref=null)", "Reference existing event (ref)"],
+                value="No reference (root J event, ref=null)",
+                label="ref (Chain Reference, Section 4.1)"
             )
             hjs_ref_hash = gr.Textbox(
-                label="ref 目标哈希",
+                label="ref Target Hash",
                 value="sha256:e8878aa9a38f4d123456789abcdef01234",
                 visible=False,
-                info="非 root J 事件时引用父事件"
+                info="Reference parent event for non-root J events"
             )
             hjs_ref_mode.change(
-                lambda c: gr.update(visible=(c == "引用已有事件 (ref)")),
+                lambda c: gr.update(visible=(c == "Reference existing event (ref)")),
                 inputs=hjs_ref_mode, outputs=hjs_ref_hash
             )
             
             gr.Markdown("---")
-            gr.Markdown("**🔒 隐私配置 (Section 4.2 & 5)**")
+            gr.Markdown("**🔒 Privacy Configuration (Section 4.2 & 5)**")
             
             hjs_privacy = gr.Dropdown(
                 choices=[
-                    ("明文 (不推荐生产环境)", "plaintext"),
-                    ("临时 DID", "ephemeral_did"),
-                    ("公钥哈希", "pubkey_hash"),
-                    ("盐值摘要 (Digest-Only)", "digest_only")
+                    ("Plaintext (NOT recommended for production)", "plaintext"),
+                    ("Ephemeral DID", "ephemeral_did"),
+                    ("Public Key Hash", "pubkey_hash"),
+                    ("Salted Digest (Digest-Only)", "digest_only")
                 ],
                 value="digest_only",
-                label="隐私模式"
+                label="Privacy Mode"
             )
             hjs_salt = gr.Textbox(
-                label="salt (盐值)",
+                label="salt (Salt Value)",
                 value="hjs-salt-2026-q2",
-                info="Digest-Only 模式 REQUIRED (Section 5.1)"
+                info="REQUIRED for Digest-Only mode (Section 5.1)"
             )
             hjs_ttl = gr.Number(
-                label="TTL 扩展 (分钟, 0=禁用)",
+                label="TTL Extension (minutes, 0=disabled)",
                 value=60,
                 minimum=0,
-                info="Section 5.2: 过期后自动匿名化"
+                info="Section 5.2: Auto-anonymize after expiry"
             )
             hjs_rotation = gr.Checkbox(
-                label="启用身份轮换 (Identity Rotation)",
+                label="Enable Identity Rotation",
                 value=False,
-                info="Section 5.3: 防止跨会话关联"
+                info="Section 5.3: Prevent cross-session correlation"
             )
             
-            hjs_gen_btn = gr.Button("生成 HJS 事件并签名", variant="primary")
+            hjs_gen_btn = gr.Button("Generate HJS Event & Sign", variant="primary")
             
             gr.Markdown("""
-            **快速实验：**
-            1. 切换 **隐私模式** → 观察 `who` 字段如何从明文变为哈希/DID
-            2. 设置 **TTL=60** → 观察 `https://jep.org/ttl` 扩展出现
-            3. 勾选 **身份轮换** → 观察 `https://hjs.org/identity_rotation` 扩展
-            4. 查看 **不可变性检测结果** → 理解机器字段为何不能篡改
+            **Quick Experiments:**
+            1. Switch **Privacy Mode** → Observe how the `who` field transforms from plaintext to hash/DID
+            2. Set **TTL=60** → Observe the `https://jep.org/ttl` extension appear
+            3. Check **Identity Rotation** → Observe the `https://hjs.org/identity_rotation` extension
+            4. View **Immutability Check Result** → Understand why machine fields cannot be tampered with
             """)
         
         # =================== CENTER: Output ===================
         with gr.Column(scale=1):
-            gr.Markdown("### 📤 HJS 事件输出")
+            gr.Markdown("### 📤 HJS Event Output")
             hjs_event_json = gr.Textbox(
-                label="HJS 事件 (JSON)",
+                label="HJS Event (JSON)",
                 lines=18,
-                info="包含隐私扩展的完整签名事件 (Section 4.3)"
+                info="Complete signed event including privacy extensions (Section 4.3)"
             )
             hjs_canonical = gr.Textbox(
-                label="JCS 规范化载荷 (RFC 8785)",
+                label="JCS Canonicalized Payload (RFC 8785)",
                 lines=5,
-                info="签名前的规范化字节序列"
+                info="Canonicalized byte sequence before signing"
             )
             hjs_sig = gr.Textbox(
-                label="JWS 签名",
+                label="JWS Signature",
                 lines=2
             )
             hjs_pubkey = gr.Textbox(
-                label="Ed25519 公钥 (PEM)",
+                label="Ed25519 Public Key (PEM)",
                 lines=4,
-                info="保存此公钥用于下方验证"
+                info="Save this public key for verification below"
             )
             hjs_immutability = gr.Textbox(
-                label="🔐 不可变性检测演示",
+                label="🔐 Immutability Check Demo",
                 lines=2,
-                info="模拟篡改 what 字段后的检测结果 (Section 4.1)"
+                info="Detection result after simulating tampering with the what field (Section 4.1)"
             )
         
         # =================== RIGHT: Verifier ===================
         with gr.Column(scale=1):
-            gr.Markdown("### 🔍 验证 HJS 事件")
-            gr.Markdown("*Section 6: 6条验证规则*")
+            gr.Markdown("### 🔍 Verify HJS Event")
+            gr.Markdown("*Section 6: 6 Verification Rules*")
             
             hjs_verify_input = gr.Textbox(
-                label="粘贴 HJS 事件 JSON",
+                label="Paste HJS Event JSON",
                 lines=12,
-                info="必须包含 sig 字段"
+                info="Must include sig field"
             )
             hjs_verify_key = gr.Textbox(
-                label="公钥 PEM",
+                label="Public Key PEM",
                 lines=4,
-                info="从生成面板复制"
+                info="Copy from the generation panel"
             )
             hjs_clock_skew = gr.Number(
-                label="时钟容差 (秒)",
+                label="Clock Skew (seconds)",
                 value=300,
                 minimum=0,
-                info="默认 ±5 分钟"
+                info="Default ±5 minutes"
             )
-            hjs_verify_btn = gr.Button("验证", variant="secondary")
+            hjs_verify_btn = gr.Button("Verify", variant="secondary")
             hjs_verify_result = gr.Textbox(
-                label="验证结果 (6 条规则)",
+                label="Verification Result (6 Rules)",
                 lines=4,
-                info="签名 / nonce / 链引用 / root-ref / 不可变 / 时间戳"
+                info="Signature / nonce / chain reference / root-ref / immutable / timestamp"
             )
     
     hjs_gen_btn.click(
@@ -451,35 +451,35 @@ with gr.Blocks(
     
     gr.Markdown("""
     ---
-    ### HJS v0.4 vs JEP 的关系
+    ### Relationship Between HJS v0.4 and JEP
     
-    | 维度 | HJS v0.4 | JEP (draft-wang-jep-04) |
-    |------|----------|------------------------|
-    | **定位** | AI 问责记录层 (Accountability Layer) | 最小可验证事件协议 (Event Protocol) |
-    | **核心原则** | 机器不可变 + 人类隐私 | 四原语最小语法 |
-    | **隐私扩展** | 原生内置 (Digest-Only, TTL, Rotation) | 可选扩展框架 |
-    | **演进关系** | **前身/过渡版本** | **正式演进方向** |
+    | Dimension | HJS v0.4 | JEP (draft-wang-jep-04) |
+    |-----------|----------|------------------------|
+    | **Positioning** | AI Accountability Layer | Minimal Verifiable Event Protocol |
+    | **Core Principle** | Machine Immutability + Human Privacy | Four-Primitive Minimal Syntax |
+    | **Privacy Extensions** | Native built-in (Digest-Only, TTL, Rotation) | Optional extension framework |
+    | **Evolution** | **Predecessor / Transition** | **Formal evolution direction** |
     
-    > HJS v0.4 明确声明 *"built upon JEP"* (Section 3)，但实际上这是改名过程中的过渡文档。
-    > HJS 关注**记录什么和如何保护隐私**，JEP 关注**最少记录什么和如何验证**。
-    > 两者共同构成从**工程实践**到**数学基础**的完整链条。
+    > HJS v0.4 explicitly states *"built upon JEP"* (Section 3), but this is actually a transition document during the renaming process.
+    > HJS focuses on **what to record and how to protect privacy**; JEP focuses on **the minimum to record and how to verify**.
+    > Together they form a complete chain from **engineering practice** to **mathematical foundation**.
     
-    ### 规范引用
+    ### Specification References
     
-    | 章节 | 本演示实现 |
-    |------|-----------|
-    | 3.1 JEP 四原语 | Dropdown 选择 |
-    | 4.1 不可变机器字段 | `IMMUTABLE_FIELDS` 常量 + 篡改检测 |
-    | 4.2 可配置人类字段 | 隐私模式切换 |
-    | 4.3 完整事件示例 | JSON 输出 |
-    | 5.1 Digest-Only | Salt + 哈希计算 |
-    | 5.2 TTL | 过期时间自动计算 |
-    | 5.3 Identity Rotation | 扩展字段注入 |
-    | 6 验证规则 | 6 步验证器 |
-    | 7 安全规则 | 签名 + nonce + 时钟检查 |
+    | Section | This Demo Implementation |
+    |---------|------------------------|
+    | 3.1 JEP Four Primitives | Dropdown selection |
+    | 4.1 Immutable Machine Fields | `IMMUTABLE_FIELDS` constant + tamper detection |
+    | 4.2 Configurable Human Fields | Privacy mode switching |
+    | 4.3 Complete Event Example | JSON output |
+    | 5.1 Digest-Only | Salt + hash computation |
+    | 5.2 TTL | Auto-computed expiry time |
+    | 5.3 Identity Rotation | Extension field injection |
+    | 6 Verification Rules | 6-step validator |
+    | 7 Security Rules | Signature + nonce + clock check |
     
-    ### 许可证
-    Apache-2.0 — HJS/JEP 永远属于公共领域。
+    ### License
+    Apache-2.0 — HJS/JEP always belongs to the public domain.
     """)
 
 if __name__ == "__main__":
